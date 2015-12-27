@@ -12,6 +12,21 @@ MULTI_HOST="True"
 API_RATE_LIMIT="False"
 RECLONE="True"
 
+# Just to improve the performances
+NOVA_REPO=/home/vagrant/openstack/nova
+CINDER_REPO=/home/vagrant/openstack/cinder
+GLANCE_REPO=/home/vagrant/openstack/glance
+NEUTRON_REPO=/home/vagrant/openstack/neutron
+KEYSTONE_REPO=/home/vagrant/openstack/keystone
+HORIZON_REPO=/home/vagrant/openstack/horizon
+REQUIREMENTS_REPO=/home/vagrant/openstack/requirements
+HEAT_REPO=/home/vagrant/openstack/heat
+
+MURANO_DASHBOARD_REPO=/home/vagrant/openstack/murano-dashboard
+MURANO_DASHBOARD_BRANCH=test-ol
+MURANO_REPO=/home/vagrant/openstack/murano
+MURANO_BRANCH=master
+
 # database configuration parameters
 
 DATABASE_TYPE=mysql
@@ -31,27 +46,35 @@ SCREEN_LOGDIR=/opt/stack/logs
 <% if @is_compute == "true" %>
 # generic configuration parameters (compute)
 
-ENABLED_SERVICES=n-cpu,n-net,c-vol
+ENABLED_SERVICES=neutron,n-cpu,q-api,q-agt,n-novnc,c-vol
 SERVICE_HOST=<%= @hostname_manager %>
 MYSQL_HOST=$SERVICE_HOST
 RABBIT_HOST=$SERVICE_HOST
 GLANCE_HOST=$SERVICE_HOST
 
-# configure ceilometer (compute)
+VNCSERVER_LISTEN=10.0.10.20
+VNCSERVER_PROXYCLIENT_ADDRESS=$VNCSERVER_LISTEN
 
-enable_service ceilometer-acompute
+#ml2
+Q_PLUGIN=ml2
+Q_AGENT=openvswitch
+
 <% else %>
 
-# configure images provided on glance (manager)
+#disable_service n-net
+#enable_service q-svc
+#enable_service q-agt
+#enable_service q-dhcp
+#enable_service q-meta
+#enable_service q-l3
 
 IMAGE_URLS="<%= @extra_images %>"
 
-# configure ceilometer (manager)
+# Enable Murano
+# enable_plugin murano /home/vagrant/openstack/murano
+# enable_service murano murano-api murano-engine
 
-enable_service dstat
-enable_service ceilometer-acompute ceilometer-acentral ceilometer-anotification ceilometer-collector ceilometer-api
-enable_service ceilometer-alarm-notifier ceilometer-alarm-evaluator
-CEILOMETER_BACKEND=mongodb
+disable_service tempest
 
 <% if @use_ldap == "true" %>
 # LDAP configuration parameters (manager)

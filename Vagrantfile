@@ -50,6 +50,8 @@ def configure_vm(name, vm, conf)
   vm.provider :virtualbox do |vb|
     # you need this for openstack guests to talk to each other
     vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+    vb.customize ["modifyvm", :id, "--memory", "6144"]
+    vb.customize ["modifyvm", :id, "--cpus", "4"]
     # if specified assign a static MAC address
     if conf["mac_address_#{name}"]
       vb.customize ["modifyvm", :id, "--macaddress2", conf["mac_address_#{name}"]]
@@ -123,7 +125,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   if Vagrant.has_plugin?("vagrant-hostmanager")
     config.hostmanager.enabled = true
-    config.hostmanager.manage_host = true
+    config.hostmanager.manage_host = false
     config.hostmanager.ignore_private_ip = false
     config.hostmanager.include_offline = true
     if conf["use_bridge"] == false
